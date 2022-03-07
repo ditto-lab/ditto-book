@@ -1,0 +1,10 @@
+[book]
+authors = ["0xbok", "calvbore"]
+language = "en"
+multilingual = false
+src = "src"
+title = "ditto-book"
+
+[output.html]
+git-repository-url = "https://github.com/ditto-lab"
+default-theme = "rust"
