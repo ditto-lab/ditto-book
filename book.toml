@@ -8,3 +8,4 @@ title = "ditto-book"
 [output.html]
 git-repository-url = "https://github.com/ditto-lab"
 default-theme = "rust"
+mathjax-support = true

@@ -1,3 +1,5 @@
+# Introduction
+
 Ditto Protocol is a trustless and governance-free NFT Futures protocol.
 
 Protocol Overview
