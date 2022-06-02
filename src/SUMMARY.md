@@ -5,6 +5,7 @@
 - [Protocol Documentation](./protocol-documentation.md)
     - [Token Ejector](./token-ejector.md)
     - [Multidimensional Clones](./multidimensional-clones.md)
+    - [Vouchers](./vouchers.md)
 - [User Guide](./user-guide.md)
     - [Open a Position on an NFT](./bid.md)
     - [Selling an NFT](./sell.md)
