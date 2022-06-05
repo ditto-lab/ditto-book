@@ -3,6 +3,7 @@
 [Introduction](./index.md)
 - [FAQ](./FAQ.md)
 - [Protocol Documentation](./protocol-documentation.md)
+    - [Ditto Auction Mechanism](./auctions)
     - [Token Ejector](./token-ejector.md)
     - [Multidimensional Clones](./multidimensional-clones.md)
     - [Vouchers](./vouchers.md)

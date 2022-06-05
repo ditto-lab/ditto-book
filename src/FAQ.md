@@ -26,9 +26,9 @@ When a clone is created a fee is set aside from the position's value, as well as
 
 Whenever a clone is traded via Ditto's auction mechanism a fee is taken and pooled towards the underlying NFT. When the underlying NFT is sold via Ditto the pooled fees are transferred to the NFT seller along with the value of the clone.
 
-### What is SALSA
+### What is SALSA?
 
-Salsa is an auction mechanism from [radicalxchange](https://twitter.com/RadxChange). You can read more about it {here}(https://en.wikipedia.org/wiki/Perpetual_futures).
+Salsa is an auction mechanism from [radicalxchange](https://twitter.com/RadxChange). You can read more about it [here](https://en.wikipedia.org/wiki/Perpetual_futures).
 
 ### What is a dutch auction?
 
