@@ -85,7 +85,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="index.html">Introduction</a></li><li class="chapter-item expanded "><a href="FAQ.html"><strong aria-hidden="true">1.</strong> FAQ</a></li><li class="chapter-item expanded "><a href="protocol-documentation.html"><strong aria-hidden="true">2.</strong> Protocol Documentation</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="token-ejector.html"><strong aria-hidden="true">2.1.</strong> Token Ejector</a></li><li class="chapter-item expanded "><a href="multidimensional-clones.html"><strong aria-hidden="true">2.2.</strong> Multidimensional Clones</a></li></ol></li><li class="chapter-item expanded "><a href="user-guide.html"><strong aria-hidden="true">3.</strong> User Guide</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="bid.html"><strong aria-hidden="true">3.1.</strong> Open a Position on an NFT</a></li><li class="chapter-item expanded "><a href="sell.html"><strong aria-hidden="true">3.2.</strong> Selling an NFT</a></li></ol></li></ol>            </div>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="index.html">Introduction</a></li><li class="chapter-item expanded "><a href="FAQ.html"><strong aria-hidden="true">1.</strong> FAQ</a></li><li class="chapter-item expanded "><a href="protocol-documentation.html"><strong aria-hidden="true">2.</strong> Protocol Documentation</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="token-ejector.html"><strong aria-hidden="true">2.1.</strong> Token Ejector</a></li><li class="chapter-item expanded "><a href="multidimensional-clones.html"><strong aria-hidden="true">2.2.</strong> Multidimensional Clones</a></li><li class="chapter-item expanded "><a href="vouchers.html"><strong aria-hidden="true">2.3.</strong> Vouchers</a></li></ol></li><li class="chapter-item expanded "><a href="user-guide.html"><strong aria-hidden="true">3.</strong> User Guide</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="bid.html"><strong aria-hidden="true">3.1.</strong> Open a Position on an NFT</a></li><li class="chapter-item expanded "><a href="sell.html"><strong aria-hidden="true">3.2.</strong> Selling an NFT</a></li></ol></li></ol>            </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
 
@@ -245,6 +245,27 @@
 <li>The corresponding index is removed from the queue.</li>
 </ul>
 <h2 id="trade"><a class="header" href="#trade">Trade</a></h2>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="vouchers"><a class="header" href="#vouchers">Vouchers</a></h1>
+<p>The Ditto smart contract keeps track of <code>vouchers</code>, a kind of receipt for having owned a clone with a position on an underlying NFT.</p>
+<p><code>vouchers</code> are recorded any time a larger position on a clone's underlying NFT replaces the current position.</p>
+<p>The important information about the position is hashed into a unique 32 byte identifier and stored in the contract. Anyone may read the smart contract to see if a voucher's identifier has been recorded. This allows for any party to construct a reward system or incentivize trading on top of Ditto.</p>
+<h2 id="encoded-information"><a class="header" href="#encoded-information">Encoded Information</a></h2>
+<ul>
+<li><code>cloneId</code> The clone ID itself contains a lot of useful information.
+<ul>
+<li>The clone's <code>protoId</code> containing the NFT contract address, token ID, ERC20 address, and a <code>floor</code> boolean.</li>
+<li>The clone's Index.</li>
+</ul>
+</li>
+<li>The recipient of the <code>voucher</code>.</li>
+<li><code>heat</code> property at the time.</li>
+<li>The smaller position's value.</li>
+<li>The larger position's value.</li>
+<li>The time at which the smaller position was opened.</li>
+<li>The time at which the voucher was issued.</li>
+<li>If the clone was at the head of the auction que at time of voucher issue.</li>
+</ul>
+<p>These variables should be helpful for any party interested in constructing incentives on top of Ditto.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="user-guide"><a class="header" href="#user-guide">User Guide</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="bidding-on-nft"><a class="header" href="#bidding-on-nft">Bidding on NFT</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="selling-an-nft"><a class="header" href="#selling-an-nft">Selling an NFT</a></h1>

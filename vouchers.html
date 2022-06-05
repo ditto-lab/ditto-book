@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Multidimensional Clones - ditto-book</title>
+        <title>Vouchers - ditto-book</title>
                 
 
         <!-- Custom HTML head -->
@@ -84,7 +84,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="index.html">Introduction</a></li><li class="chapter-item expanded "><a href="FAQ.html"><strong aria-hidden="true">1.</strong> FAQ</a></li><li class="chapter-item expanded "><a href="protocol-documentation.html"><strong aria-hidden="true">2.</strong> Protocol Documentation</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="token-ejector.html"><strong aria-hidden="true">2.1.</strong> Token Ejector</a></li><li class="chapter-item expanded "><a href="multidimensional-clones.html" class="active"><strong aria-hidden="true">2.2.</strong> Multidimensional Clones</a></li><li class="chapter-item expanded "><a href="vouchers.html"><strong aria-hidden="true">2.3.</strong> Vouchers</a></li></ol></li><li class="chapter-item expanded "><a href="user-guide.html"><strong aria-hidden="true">3.</strong> User Guide</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="bid.html"><strong aria-hidden="true">3.1.</strong> Open a Position on an NFT</a></li><li class="chapter-item expanded "><a href="sell.html"><strong aria-hidden="true">3.2.</strong> Selling an NFT</a></li></ol></li></ol>            </div>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="index.html">Introduction</a></li><li class="chapter-item expanded "><a href="FAQ.html"><strong aria-hidden="true">1.</strong> FAQ</a></li><li class="chapter-item expanded "><a href="protocol-documentation.html"><strong aria-hidden="true">2.</strong> Protocol Documentation</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="token-ejector.html"><strong aria-hidden="true">2.1.</strong> Token Ejector</a></li><li class="chapter-item expanded "><a href="multidimensional-clones.html"><strong aria-hidden="true">2.2.</strong> Multidimensional Clones</a></li><li class="chapter-item expanded "><a href="vouchers.html" class="active"><strong aria-hidden="true">2.3.</strong> Vouchers</a></li></ol></li><li class="chapter-item expanded "><a href="user-guide.html"><strong aria-hidden="true">3.</strong> User Guide</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="bid.html"><strong aria-hidden="true">3.1.</strong> Open a Position on an NFT</a></li><li class="chapter-item expanded "><a href="sell.html"><strong aria-hidden="true">3.2.</strong> Selling an NFT</a></li></ol></li></ol>            </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
 
@@ -148,39 +148,37 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="multidimensional-clones"><a class="header" href="#multidimensional-clones">Multidimensional Clones</a></h1>
-<p>Ditto Protocol creates a queue of clones. Each clone is that queue represent an eventual claim on some unique NFT. The clone at the front of the queue has the immediate claim on the underlying NFT when sold through the protocol.</p>
-<p>As soon as this trade happens, the NFT is transferred to that clone owner, and the clone is burned.</p>
-<p>Here's a more technical description for accuracy -</p>
-<p>A queue <code>Q</code> is identified by a parameter <code>protoId</code> which is a hash of</p>
+                        <h1 id="vouchers"><a class="header" href="#vouchers">Vouchers</a></h1>
+<p>The Ditto smart contract keeps track of <code>vouchers</code>, a kind of receipt for having owned a clone with a position on an underlying NFT.</p>
+<p><code>vouchers</code> are recorded any time a larger position on a clone's underlying NFT replaces the current position.</p>
+<p>The important information about the position is hashed into a unique 32 byte identifier and stored in the contract. Anyone may read the smart contract to see if a voucher's identifier has been recorded. This allows for any party to construct a reward system or incentivize trading on top of Ditto.</p>
+<h2 id="encoded-information"><a class="header" href="#encoded-information">Encoded Information</a></h2>
 <ul>
-<li>the underlying <code>ERC721</code>/<code>ERC1155</code> contract adress, say <code>A</code>.</li>
-<li><code>tokenId</code> of <code>A</code>, say <code>id</code></li>
-<li>the <code>ERC20</code> contract, say <code>B</code></li>
-<li>and a boolean <code>floor</code>.</li>
-</ul>
-<p>All put together this means that the clones part of this queue want a claim on the NFT represented by <code>A</code> with tokenId <code>id</code>, and they are bidding using tokens of <code>B</code>. If <code>floor</code> is <code>true</code>, the clones are not bidding for any specific token in the NFT collection. In this case, <code>id</code> must have a constant value - <code>FLOOR_ID</code>.</p>
-<p>The queue now contains indexes (non-negative integers), and a <code>(protoId, index)</code> tuple uniquely identifies a clone. In fact, <code>cloneId</code> is defined as the hash of <code>protoId</code> and <code>index</code>.</p>
-<p>A bidder is allowed to bid on an existing clone, or a new clone which is pushed at the end of the queue. If no clone is dissolved, the index of the clones in the queue will be <code>0,1,2,...</code> and so on. But since, a clone can be dissolved, at any moment the queue will be missing the indexes corresponding to the dissolved clones.</p>
-<h2 id="duplicate"><a class="header" href="#duplicate">Duplicate</a></h2>
-<h2 id="dissolve"><a class="header" href="#dissolve">Dissolve</a></h2>
-<p>A clone owner can choose to burn the clone, which in effect, removes their claim on the underlying NFT.</p>
+<li><code>cloneId</code> The clone ID itself contains a lot of useful information.
 <ul>
-<li>Their bid is returned after subtracting the subsidy and fee.</li>
-<li>The subsidy is passed to the clone next in the queue.</li>
-<li>The corresponding index is removed from the queue.</li>
+<li>The clone's <code>protoId</code> containing the NFT contract address, token ID, ERC20 address, and a <code>floor</code> boolean.</li>
+<li>The clone's Index.</li>
 </ul>
-<h2 id="trade"><a class="header" href="#trade">Trade</a></h2>
+</li>
+<li>The recipient of the <code>voucher</code>.</li>
+<li><code>heat</code> property at the time.</li>
+<li>The smaller position's value.</li>
+<li>The larger position's value.</li>
+<li>The time at which the smaller position was opened.</li>
+<li>The time at which the voucher was issued.</li>
+<li>If the clone was at the head of the auction que at time of voucher issue.</li>
+</ul>
+<p>These variables should be helpful for any party interested in constructing incentives on top of Ditto.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                                                    <a rel="prev" href="token-ejector.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                                    <a rel="prev" href="multidimensional-clones.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
                         
-                                                    <a rel="next" href="vouchers.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                                    <a rel="next" href="user-guide.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
                         
@@ -190,11 +188,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                                    <a rel="prev" href="token-ejector.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                    <a rel="prev" href="multidimensional-clones.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
                 
-                                    <a rel="next" href="vouchers.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                    <a rel="next" href="user-guide.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
                             </nav>
