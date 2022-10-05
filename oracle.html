@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Introduction - ditto-book</title>
+        <title>Oracle - ditto-book</title>
                 
 
         <!-- Custom HTML head -->
@@ -84,7 +84,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="index.html" class="active">Introduction</a></li><li class="chapter-item expanded "><a href="FAQ.html"><strong aria-hidden="true">1.</strong> FAQ</a></li><li class="chapter-item expanded "><a href="protocol-documentation.html"><strong aria-hidden="true">2.</strong> Protocol Documentation</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="auctions.html"><strong aria-hidden="true">2.1.</strong> Ditto Auction Mechanism</a></li><li class="chapter-item expanded "><a href="token-ejector.html"><strong aria-hidden="true">2.2.</strong> Token Ejector</a></li><li class="chapter-item expanded "><a href="multidimensional-clones.html"><strong aria-hidden="true">2.3.</strong> Multidimensional Clones</a></li><li class="chapter-item expanded "><a href="vouchers.html"><strong aria-hidden="true">2.4.</strong> Vouchers</a></li><li class="chapter-item expanded "><a href="oracle.html"><strong aria-hidden="true">2.5.</strong> Oracle</a></li></ol></li><li class="chapter-item expanded "><a href="user-guide.html"><strong aria-hidden="true">3.</strong> User Guide</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="bid.html"><strong aria-hidden="true">3.1.</strong> Open a Position on an NFT</a></li><li class="chapter-item expanded "><a href="sell.html"><strong aria-hidden="true">3.2.</strong> Selling an NFT</a></li></ol></li></ol>            </div>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="index.html">Introduction</a></li><li class="chapter-item expanded "><a href="FAQ.html"><strong aria-hidden="true">1.</strong> FAQ</a></li><li class="chapter-item expanded "><a href="protocol-documentation.html"><strong aria-hidden="true">2.</strong> Protocol Documentation</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="auctions.html"><strong aria-hidden="true">2.1.</strong> Ditto Auction Mechanism</a></li><li class="chapter-item expanded "><a href="token-ejector.html"><strong aria-hidden="true">2.2.</strong> Token Ejector</a></li><li class="chapter-item expanded "><a href="multidimensional-clones.html"><strong aria-hidden="true">2.3.</strong> Multidimensional Clones</a></li><li class="chapter-item expanded "><a href="vouchers.html"><strong aria-hidden="true">2.4.</strong> Vouchers</a></li><li class="chapter-item expanded "><a href="oracle.html" class="active"><strong aria-hidden="true">2.5.</strong> Oracle</a></li></ol></li><li class="chapter-item expanded "><a href="user-guide.html"><strong aria-hidden="true">3.</strong> User Guide</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="bid.html"><strong aria-hidden="true">3.1.</strong> Open a Position on an NFT</a></li><li class="chapter-item expanded "><a href="sell.html"><strong aria-hidden="true">3.2.</strong> Selling an NFT</a></li></ol></li></ol>            </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
 
@@ -148,44 +148,36 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="introduction"><a class="header" href="#introduction">Introduction</a></h1>
-<p>Ditto Protocol is a trustless and governance-free NFT Futures protocol.</p>
-<h2 id="protocol-overview"><a class="header" href="#protocol-overview">Protocol Overview</a></h2>
-<p>Interested buyers of an NFT can mint or buy a Future, called a Clone.</p>
-<p>Each clone encodes –</p>
+                        <h1 id="oracle"><a class="header" href="#oracle">Oracle</a></h1>
+<p>To track a clone's worth on-chain, Ditto protocol has a oracle built into its smart contract. The oracle design is the same as Uniswap V3 oracle. Any time a clone's worth changes (duplicate, dissolve, trade), the current <em>accumulated worth</em> is stored with the current timestamp.</p>
+<blockquote>
+<p><strong>Note:</strong> Not all clones are tracked by the oracle. Only the clones at the front of a <code>protoId</code> queue are tracked.</p>
+</blockquote>
+<h2 id="accumulated-worth"><a class="header" href="#accumulated-worth">Accumulated worth</a></h2>
+<p>Let's say due to some action, a clone's worth changes from \(w_{n}\) to \(w_{n+1}\) at timestamp \(t_{n}\). The current accumulated worth is \(W_{n}\) and was lated updated at time \(T_{n}\). After the action is done, these are the new values:
+\[W_{n+1} = W_{n} + (w_n \times (t_{n}-T_{n}))\]
+\[T_{n+1} = t_{n}\]</p>
+<p>The first time clone is duplicated, accumulated worth and current worth of a clone is <code>0</code>, so cumulative worth remains \(W_1\) remains <code>0</code>, and \(T_1\) is set to the current timestamp.</p>
+<p>Effectively, <em>accumulated worth</em> is the sum of all the worths of a clone in the past weighted by the duration for which that worth remained unchanged.</p>
+<blockquote>
+<p><strong>Note:</strong> From the above equations, the following conclusions can be derived:</p>
 <ul>
-<li>an NFT collection,</li>
-<li>a specific token or the floor of that NFT collection,</li>
-<li>its current worth,</li>
-<li>minimum bid amount to purchase the clone decided by the smart contract.</li>
+<li>the oracle update happens <em>before</em> the price change.</li>
+<li>If multiple updates happen in the same block, writing each of them to oracle is a no-op. So only the first update in a block is written to oracle.</li>
 </ul>
-<p>If a bidder bids on a clone with an amount greater than the minimum bid amount, the clone is transferred to them from the current owner. On each Clone transfer, a fee is taken from the bid amount which is split between the previous holder of the Clone and a separate pool.</p>
-<p>A clone represents a claim to receive the NFT when it’s sold via Ditto Protocol. A clone can be a floor Future, which means its worth is the minimum amount the NFT seller gets.</p>
-<p>As that Clone gets traded, the pool size increases, incentivizing the NFT holder to sell their NFT via the Ditto Protocol.</p>
-<p>Protocol features –</p>
-<ul>
-<li>Ditto protocol is fully trustless and governance free. All the parameters are hardcoded in the contract with no way to change it after deployment.</li>
-<li>There is no protocol fee, and any other fee is to incentivize protocol participation.</li>
-<li>We are looking at Verifiable Delay Functions (VDF) to combat front running.</li>
-<li>TWAP oracle for clone prices.</li>
-<li>On a clone transfer from a bidder, in addition to receiving a part of the fee from the higher bid, they’ll receive an on-chain NFT. We believe this will act as an additional incentive to participate in the protocol, and we want to work with an artist to make these NFTs something people will want to own.</li>
-</ul>
-<p>The protocol is inspired by the <a href="https://www.radicalxchange.org/kiosk/blog/millennials-zoomers-and-salsa-just-radical-enough/">SALSA</a> concept from <a href="https://twitter.com/RadxChange">radicalxchange</a>.</p>
-<h2 id="gitcoin-grant"><a class="header" href="#gitcoin-grant">Gitcoin Grant</a></h2>
-<p>If you want to support us, we are accepting funding via our <a href="https://gitcoin.co/grants/4866/ditto-protocol-trustless-nft-futures">Gitcoin grant</a>.</p>
-<h2 id="reference"><a class="header" href="#reference">Reference</a></h2>
-<ul>
-<li><a href="https://github.com/ditto-lab/">Github</a></li>
-<li><a href="https://twitter.com/ditto_lab">Twitter</a></li>
-<li><a href="https://ditto-lab.github.io/">Website</a></li>
-</ul>
+</blockquote>
+<h2 id="time-weighted-average-worth"><a class="header" href="#time-weighted-average-worth">Time weighted average worth</a></h2>
+<p>TWAP (time weighted average price) oracles are widely used to be secure from price manipulation attacks. Historical observations for a clone are persisted by oracle and only overwritten when number of obseravtions written exceed a threshold (defined by <em>cardinality</em>). Initially, only 1 observation per clone is persisted, so a new update overwrites the previous observation. However, anyone can call <code>Oracle.grow()</code> function to increase the cardinality for a clone up to a maximum of 65535. This means Ditto can store up to a maximum of 65535 observations for a clone.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
+                                                    <a rel="prev" href="vouchers.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
                         
-                                                    <a rel="next" href="FAQ.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                                    <a rel="next" href="user-guide.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
                         
@@ -195,8 +187,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                                    <a rel="prev" href="vouchers.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
                 
-                                    <a rel="next" href="FAQ.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                    <a rel="next" href="user-guide.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
                             </nav>

@@ -84,7 +84,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="index.html">Introduction</a></li><li class="chapter-item expanded "><a href="FAQ.html"><strong aria-hidden="true">1.</strong> FAQ</a></li><li class="chapter-item expanded "><a href="protocol-documentation.html"><strong aria-hidden="true">2.</strong> Protocol Documentation</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="auctions.html" class="active"><strong aria-hidden="true">2.1.</strong> Ditto Auction Mechanism</a></li><li class="chapter-item expanded "><a href="token-ejector.html"><strong aria-hidden="true">2.2.</strong> Token Ejector</a></li><li class="chapter-item expanded "><a href="multidimensional-clones.html"><strong aria-hidden="true">2.3.</strong> Multidimensional Clones</a></li><li class="chapter-item expanded "><a href="vouchers.html"><strong aria-hidden="true">2.4.</strong> Vouchers</a></li></ol></li><li class="chapter-item expanded "><a href="user-guide.html"><strong aria-hidden="true">3.</strong> User Guide</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="bid.html"><strong aria-hidden="true">3.1.</strong> Open a Position on an NFT</a></li><li class="chapter-item expanded "><a href="sell.html"><strong aria-hidden="true">3.2.</strong> Selling an NFT</a></li></ol></li></ol>            </div>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="index.html">Introduction</a></li><li class="chapter-item expanded "><a href="FAQ.html"><strong aria-hidden="true">1.</strong> FAQ</a></li><li class="chapter-item expanded "><a href="protocol-documentation.html"><strong aria-hidden="true">2.</strong> Protocol Documentation</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="auctions.html" class="active"><strong aria-hidden="true">2.1.</strong> Ditto Auction Mechanism</a></li><li class="chapter-item expanded "><a href="token-ejector.html"><strong aria-hidden="true">2.2.</strong> Token Ejector</a></li><li class="chapter-item expanded "><a href="multidimensional-clones.html"><strong aria-hidden="true">2.3.</strong> Multidimensional Clones</a></li><li class="chapter-item expanded "><a href="vouchers.html"><strong aria-hidden="true">2.4.</strong> Vouchers</a></li><li class="chapter-item expanded "><a href="oracle.html"><strong aria-hidden="true">2.5.</strong> Oracle</a></li></ol></li><li class="chapter-item expanded "><a href="user-guide.html"><strong aria-hidden="true">3.</strong> User Guide</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="bid.html"><strong aria-hidden="true">3.1.</strong> Open a Position on an NFT</a></li><li class="chapter-item expanded "><a href="sell.html"><strong aria-hidden="true">3.2.</strong> Selling an NFT</a></li></ol></li></ol>            </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
 
@@ -148,7 +148,22 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="ditto-auction-mechanism"><a class="header" href="#ditto-auction-mechanism">Ditto Auction Mechanism</a></h1>
+                        <h1 id="ditto-auction-mechanism--heat"><a class="header" href="#ditto-auction-mechanism--heat">Ditto Auction Mechanism &amp; Heat</a></h1>
+<h2 id="auctions"><a class="header" href="#auctions">Auctions</a></h2>
+<p>When a Ditto clone is created it is up for auction at all times via SALSA.</p>
+<p>A clone has a self-assessed value called its <code>worth</code>. When the clone is minted its auction price is calculated as <code>2 * worth</code> with its price descending until it is equal to <code>worth</code> over a set dutch auction period. Once the dutch auction period has finished the minimum price to purchase the clone is its <code>worth</code> until it is sold via the auction.</p>
+<p>After the clone is sold through the auction mechanism, the dutch auction period is then reset for the process to start over.</p>
+<h2 id="heat"><a class="header" href="#heat">Heat</a></h2>
+<p><code>heat</code> is a variable of each clone determining fee amounts, and dutch auction period lengths. The <code>heat</code> of a clone is increased by <code>1</code> anytime a larger position is opened on a clone, and decreases relative to how much time has elapsed during its dutch auction.</p>
+<p><code>heat</code> has a maximum value of <code>255</code>.</p>
+<p>If a clone's heat is 200 and half it's dutch auction period has elapsed when a larger position is opened on the underlying then its <code>heat</code> will become <code>100 + 1</code>, halved because of the elapsed time and <code>+ 1</code> because a larger positioned was opened on top of it.</p>
+<h3 id="fee-calculation"><a class="header" href="#fee-calculation">Fee Calculation</a></h3>
+<p>Fees are calculated as <code>heat * 32 / 2**16-1</code>. The minimum fee to be paid on an auction is <code>%0.04882887</code> while the maximum fee is <code>%12.451361868</code> as <code>heat</code> cannot exceed <code>255</code>.</p>
+<h3 id="dutch-auction-length-curve"><a class="header" href="#dutch-auction-length-curve">Dutch Auction Length Curve</a></h3>
+<p>Dutch auction length periods increase in time relative to heat according to this formula:</p>
+<pre><code>2^18 + (  (1 day) * 7 * log_2(cbrt(heat)) * sqrt(heat)  )
+</code></pre>
+<p>Dutch auction lengths can range between ~3 days to ~297 days. These auction lengths give a clone owner a reasonable assurance that they will own the position on the underlying until another outbids them for a higher value position.</p>
 
                     </main>
 
