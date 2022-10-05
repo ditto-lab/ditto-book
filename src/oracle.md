@@ -14,8 +14,8 @@ The first time clone is duplicated, accumulated worth and current worth of a clo
 Effectively, _accumulated worth_ is the sum of all the worths of a clone in the past weighted by the duration for which that worth remained unchanged.
 
 >**Note:** From the above equations, the following conclusions can be derived:
-- the oracle update happens _before_ the price change.
-- If multiple updates happen in the same block, writing each of them to oracle is a no-op. So only the first update in a block is written to oracle.
+>- the oracle update happens _before_ the price change.
+>- If multiple updates happen in the same block, writing each of them to oracle is a no-op. So only the first update in a block is written to oracle.
 
 ## Time weighted average worth
 TWAP (time weighted average price) oracles are widely used to be secure from price manipulation attacks. Historical observations for a clone are persisted by oracle and only overwritten when number of obseravtions written exceed a threshold (defined by _cardinality_). Initially, only 1 observation per clone is persisted, so a new update overwrites the previous observation. However, anyone can call `Oracle.grow()` function to increase the cardinality for a clone up to a maximum of 65535. This means Ditto can store up to a maximum of 65535 observations for a clone.
