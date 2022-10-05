@@ -2,9 +2,9 @@
 
 ## Auctions
 
-When a Ditto clone is created it is up for auction at all times via SALSA.
+When a Ditto clone is created it is put up for auction at all times via SALSA.
 
-A clone has a self-assessed value called its `worth`. When the clone is minted its auction price is calculated as `2 * worth` with its price descending until it is equal to `worth` over a set dutch auction period. Once the dutch auction period has finished the minimum price to purchase the clone is its `worth` until it is sold via the auction.
+A clone has a self-assessed value called its `worth`. When the clone is minted its auction price is calculated as `2 * worth` with its price descending linearly until it is equal to its `worth` over a set dutch auction period. Once the dutch auction period has finished the minimum price to purchase the clone is its `worth` until it is sold via the auction.
 
 After the clone is sold through the auction mechanism, the dutch auction period is then reset for the process to start over.
 

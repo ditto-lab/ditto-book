@@ -8,6 +8,7 @@ The important information about the position is hashed into a unique 32 byte ide
 
 ## Encoded Information
 
+- If the clone was at the head of the auction queue at time of voucher issue.
 - `cloneId` The clone ID itself contains a lot of useful information.
   - The clone's `protoId` containing the NFT contract address, token ID, ERC20 address, and a `floor` boolean.
   - The clone's Index.
@@ -17,6 +18,5 @@ The important information about the position is hashed into a unique 32 byte ide
 - The larger position's value.
 - The time at which the smaller position was opened.
 - The time at which the voucher was issued.
-- If the clone was at the head of the auction que at time of voucher issue.
 
 These variables should be helpful for any party interested in constructing incentives on top of Ditto.
