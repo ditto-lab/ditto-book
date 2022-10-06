@@ -149,15 +149,15 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="oracle"><a class="header" href="#oracle">Oracle</a></h1>
-<p>To track a clone's worth on-chain, Ditto protocol has a oracle built into its smart contract. The oracle design is the same as Uniswap V3 oracle. Any time a clone's worth changes (duplicate, dissolve, trade), the current <em>accumulated worth</em> is stored with the current timestamp.</p>
+<p>To track a clone's worth on-chain, Ditto protocol has a oracle built into its smart contract. The oracle design is the same as the Uniswap V3 oracle. Any time a clone's worth changes (duplicate, dissolve, trade), the current <em>accumulated worth</em> is stored with the current timestamp.</p>
 <blockquote>
 <p><strong>Note:</strong> Not all clones are tracked by the oracle. Only the clones at the front of a <code>protoId</code> queue are tracked.</p>
 </blockquote>
 <h2 id="accumulated-worth"><a class="header" href="#accumulated-worth">Accumulated worth</a></h2>
-<p>Let's say due to some action, a clone's worth changes from \(w_{n}\) to \(w_{n+1}\) at timestamp \(t_{n}\). The current accumulated worth is \(W_{n}\) and was lated updated at time \(T_{n}\). After the action is done, these are the new values:
+<p>Let's say due to some action, a clone's worth changes from \(w_{n}\) to \(w_{n+1}\) at timestamp \(t_{n}\). The current accumulated worth is \(W_{n}\) and was last updated at time \(T_{n}\). After the action is done, these are the new values:
 \[W_{n+1} = W_{n} + (w_n \times (t_{n}-T_{n}))\]
 \[T_{n+1} = t_{n}\]</p>
-<p>The first time clone is duplicated, accumulated worth and current worth of a clone is <code>0</code>, so cumulative worth remains \(W_1\) remains <code>0</code>, and \(T_1\) is set to the current timestamp.</p>
+<p>The first time a clone is duplicated, the accumulated worth and current worth of a clone is <code>0</code>, so cumulative worth remains \(W_1\) remains <code>0</code>, and \(T_1\) is set to the current timestamp.</p>
 <p>Effectively, <em>accumulated worth</em> is the sum of all the worths of a clone in the past weighted by the duration for which that worth remained unchanged.</p>
 <blockquote>
 <p><strong>Note:</strong> From the above equations, the following conclusions can be derived:</p>
@@ -167,8 +167,8 @@
 </ul>
 </blockquote>
 <h2 id="time-weighted-average-worth"><a class="header" href="#time-weighted-average-worth">Time weighted average worth</a></h2>
-<p>TWAP (time weighted average price) oracles are widely used to be secure from price manipulation attacks. Historical observations for a clone are persisted by oracle and only overwritten when number of obseravtions written exceed a threshold (defined by <em>cardinality</em>). Initially, only 1 observation per clone is persisted, so a new update overwrites the previous observation. However, anyone can call <code>grow(protoId, cardinality)</code> function to increase the cardinality for a clone up to a maximum of 65535. This means Ditto can store up to a maximum of 65535 observations for a clone.</p>
-<p>Even though, the technically correct term is Time weighted average worth (TWAW), we'll continue to use the term <em>TWAP</em> to refer to it.</p>
+<p>TWAP (time weighted average price) oracles are widely used to be secure from price manipulation attacks. Historical observations for a clone are persisted by oracle and only overwritten when the number of observations written exceeds a threshold (defined by <em>cardinality</em>). Initially, only 1 observation per clone is persisted, so a new update overwrites the previous observation. However, anyone can call <code>grow(protoId, cardinality)</code> function to increase the cardinality for a clone up to a maximum of 65535. This means Ditto can store up to a maximum of 65535 observations for a clone.</p>
+<p>Even though the technically correct term is Time weighted average worth (TWAW), we'll continue to use the term <em>TWAP</em> to refer to it.</p>
 <h2 id="reading-observations"><a class="header" href="#reading-observations">Reading observations</a></h2>
 <p>To read from oracle, call <code>observe(protoId, secondsAgos)</code>. <code>secondsAgos</code> is an array of length <code>n</code>. This call returns an array <code>cumulativeWorth</code> of the same length <code>n</code>.</p>
 <p><code>cumulativeWorth[i]</code> represents the accumulated worth at time <code>t-secondsAgos[i]</code>. Effectively, you can look back in the past and read the cumulative worth of a clone. We now dive into how different possible values of <code>secondsAgos</code> are handled:</p>
@@ -184,20 +184,21 @@
 </li>
 <li>
 <p><strong><code>secondsAgos[i]</code> points to a time between 2 consecutive observations</strong>: This returns a time weighted cumulative worth of 2 consecutive observations.</p>
-<p>Let's the two consecutive observations are: \(w_1, t_1\) and \(w_2, t_2\), and <code>secondsAgos[i]</code> refers to time \(t\). Then the time weight cumulative worth is \(w_1 + (w_2 \times (t-t_1))\). Effectively, this refers to the observation if it would have been written at time \(t\).</p>
+<p>Let's say the two consecutive observations are: \(w_1, t_1\) and \(w_2, t_2\), and <code>secondsAgos[i]</code> refers to time \(t\). Then the time weight cumulative worth is \(w_1 + (w_2 \times (t-t_1))\). Effectively, this refers to the observation if it would have been written at time \(t\).</p>
 </li>
 <li>
 <p><strong><code>secondsAgos[i]</code> points to a time newer than the timestamp of the newest observation</strong>: This returns a time weighted cumulative worth of the latest observation and current worth.</p>
-<p>Let's the latest observation is: \(w_1, t_1\) and the current worth is \(w_2\), and <code>secondsAgos[i]</code> refers to time \(t\). Then the time weight cumulative worth is \(w_1 + (w_2 \times (t-t_1))\). Effectively, this refers to the observation if it would have been written at time \(t\). It's the same concept noted in the previous point.</p>
+<p>Let's say the latest observation is: \(w_1, t_1\) and the current worth is \(w_2\), and <code>secondsAgos[i]</code> refers to time \(t\). Then the time weight cumulative worth is \(w_1 + (w_2 \times (t-t_1))\). Effectively, this refers to the observation if it would have been written at time \(t\). It's the same concept noted in the previous point.</p>
 </li>
 </ul>
+<h2 id="calculating-twap"><a class="header" href="#calculating-twap">Calculating TWAP</a></h2>
 <p>Now what callers would generally need is time weighted average worth between 2 timestamps \(t_0\) and \(t_1\);  \(t_1\) being the current time. To get a TWAP:</p>
 <ul>
-<li>call <code>cw = observe(protoId, [t_0, t_1])</code>. (<code>cw</code> referring to cumulative worth).</li>
+<li>call <code>cw = observe(protoId, [t_0, t_1])</code>. (<code>cw</code> refers to cumulative worth).</li>
 <li>then TWAP is given by <code>(cw[1]-cw[0])/(t_1-t_0)</code>.</li>
 </ul>
 <h2 id="effects-of-increasing-time-interval-for-twap"><a class="header" href="#effects-of-increasing-time-interval-for-twap">Effects of increasing time interval for TWAP</a></h2>
-<p>TWAP model is suggested for safety from any recent volatility or price manipulation attacks on Ditto clones. Increase in the time interval makes it less sensitive towards these kind of attacks. However, this also has makes the TWAP deviate from the market price. So the callers should determine a suitable time interval depending on the use case.</p>
+<p>TWAP model is suggested for safety from any recent volatility or price manipulation attacks on Ditto clones. Increase in the time interval makes it less sensitive towards these kinds of attacks. However, this also makes the TWAP deviate from the market price. So the callers should determine a suitable time interval depending on the use case.</p>
 
                     </main>
 
