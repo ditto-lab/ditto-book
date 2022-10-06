@@ -217,7 +217,7 @@
 <p>Dutch auction lengths can range between ~3 days to ~297 days. These auction lengths give a clone owner a reasonable assurance that they will own the position on the underlying until another outbids them for a higher value position.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="token-ejector"><a class="header" href="#token-ejector">Token Ejector</a></h1>
 <p>If you are developing a smart contract that plans to hold Ditto clones it is worth considering implementing the token ejector.</p>
-<pre><code class="language-solidity">interface IERC721TokenEjector {
+<pre><code class="language-javascript">interface IERC721TokenEjector {
 
     function onERC721Ejected(
         address operator,
@@ -229,7 +229,7 @@
 }
 </code></pre>
 <p>Because a clone can be force transferred from one owner to a new owner via the Ditto auction mechanism the Ditto contract will try to call the <code>onERC721Ejected</code> function on the previous owner.</p>
-<pre><code class="language-solidity">if (from.code.length != 0) {
+<pre><code class="language-javascript">if (from.code.length != 0) {
     try IERC721TokenEjector(from).onERC721Ejected{gas: 30000}(address(this), to, id, &quot;&quot;) {} // EXTERNAL CALL
     catch {}
 }
