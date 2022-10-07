@@ -2,7 +2,7 @@
 
 If you are developing a smart contract that plans to hold Ditto clones it is worth considering implementing the token ejector.
 
-```solidity
+```javascript
 interface IERC721TokenEjector {
 
     function onERC721Ejected(
@@ -16,7 +16,7 @@ interface IERC721TokenEjector {
 ```
 Because a clone can be force transferred from one owner to a new owner via the Ditto auction mechanism the Ditto contract will try to call the `onERC721Ejected` function on the previous owner.
 
-```solidity
+```javascript
 if (from.code.length != 0) {
     try IERC721TokenEjector(from).onERC721Ejected{gas: 30000}(address(this), to, id, "") {} // EXTERNAL CALL
     catch {}
