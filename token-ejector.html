@@ -149,7 +149,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="token-ejector"><a class="header" href="#token-ejector">Token Ejector</a></h1>
-<p>If you are developing a smart contract that plans to hold Ditto clones it is worth considering implementing the token ejector.</p>
+<p>If you are developing a smart contract that plans to hold Ditto clones, it is worth considering implementing the token ejector.</p>
 <pre><code class="language-javascript">interface IERC721TokenEjector {
 
     function onERC721Ejected(
@@ -161,14 +161,14 @@
 
 }
 </code></pre>
-<p>Because a clone can be force transferred from one owner to a new owner via the Ditto auction mechanism the Ditto contract will try to call the <code>onERC721Ejected</code> function on the previous owner.</p>
+<p>Because a clone can be force transferred to a new owner via the Ditto auction mechanism, the Ditto contract will try to call the <code>onERC721Ejected</code> function on the previous owner.</p>
 <pre><code class="language-javascript">if (from.code.length != 0) {
-    try IERC721TokenEjector(from).onERC721Ejected{gas: 30000}(address(this), to, id, &quot;&quot;) {} // EXTERNAL CALL
+    try IERC721TokenEjector(from).onERC721Ejected{gas: 30000}(address(this), to, id, &quot;&quot;) {}
     catch {}
 }
 </code></pre>
-<p>This will allow any smart contract that implements the token ejector a chance to do their own accounting or enact any necessary actions when the clone is force transferred from them to the new owner.</p>
-<p>The function call is given up to a <code>30 000</code> gas stipend to accomplish its goals. This should be more than enough gas to get anything reasonable done.</p>
+<p>This will allow any smart contract that implements the token ejector a chance to do their own accounting or enact any necessary actions when the clone is force transferred from them.</p>
+<p>The function call is given up to a <code>30_000</code> gas stipend to accomplish its goals. This should be more than enough gas to get anything reasonable done.</p>
 <p>If your contract does not implement <code>onERC721Ejected</code> the forced transfer will proceed as intended in any case.</p>
 <p>It is highly recommended when implementing <code>onERC721Ejected</code> to check that <code>msg.sender</code> and/or <code>operator</code> are coming from the expected address. Not properly checking these could result in a potential exploit or unintended behaviour.</p>
 

@@ -216,7 +216,7 @@
 </code></pre>
 <p>Dutch auction lengths can range between ~3 days to ~297 days. These auction lengths give a clone owner a reasonable assurance that they will own the position on the underlying until another outbids them for a higher value position.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="token-ejector"><a class="header" href="#token-ejector">Token Ejector</a></h1>
-<p>If you are developing a smart contract that plans to hold Ditto clones it is worth considering implementing the token ejector.</p>
+<p>If you are developing a smart contract that plans to hold Ditto clones, it is worth considering implementing the token ejector.</p>
 <pre><code class="language-javascript">interface IERC721TokenEjector {
 
     function onERC721Ejected(
@@ -228,31 +228,55 @@
 
 }
 </code></pre>
-<p>Because a clone can be force transferred from one owner to a new owner via the Ditto auction mechanism the Ditto contract will try to call the <code>onERC721Ejected</code> function on the previous owner.</p>
+<p>Because a clone can be force transferred to a new owner via the Ditto auction mechanism, the Ditto contract will try to call the <code>onERC721Ejected</code> function on the previous owner.</p>
 <pre><code class="language-javascript">if (from.code.length != 0) {
-    try IERC721TokenEjector(from).onERC721Ejected{gas: 30000}(address(this), to, id, &quot;&quot;) {} // EXTERNAL CALL
+    try IERC721TokenEjector(from).onERC721Ejected{gas: 30000}(address(this), to, id, &quot;&quot;) {}
     catch {}
 }
 </code></pre>
-<p>This will allow any smart contract that implements the token ejector a chance to do their own accounting or enact any necessary actions when the clone is force transferred from them to the new owner.</p>
-<p>The function call is given up to a <code>30 000</code> gas stipend to accomplish its goals. This should be more than enough gas to get anything reasonable done.</p>
+<p>This will allow any smart contract that implements the token ejector a chance to do their own accounting or enact any necessary actions when the clone is force transferred from them.</p>
+<p>The function call is given up to a <code>30_000</code> gas stipend to accomplish its goals. This should be more than enough gas to get anything reasonable done.</p>
 <p>If your contract does not implement <code>onERC721Ejected</code> the forced transfer will proceed as intended in any case.</p>
 <p>It is highly recommended when implementing <code>onERC721Ejected</code> to check that <code>msg.sender</code> and/or <code>operator</code> are coming from the expected address. Not properly checking these could result in a potential exploit or unintended behaviour.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="multidimensional-clones"><a class="header" href="#multidimensional-clones">Multidimensional Clones</a></h1>
-<p>Ditto Protocol creates a queue of clones. Each clone is that queue represent an eventual claim on some unique NFT. The clone at the front of the queue has the immediate claim on the underlying NFT when sold through the protocol.</p>
+<p>Ditto Protocol creates a queue of clones. Each clone in that queue represents an eventual claim on some unique NFT. The clone at the front of the queue has the immediate claim on the underlying NFT when sold through the protocol.</p>
 <p>As soon as this trade happens, the NFT is transferred to that clone owner, and the clone is burned.</p>
 <p>Here's a more technical description for accuracy -</p>
 <p>A queue <code>Q</code> is identified by a parameter <code>protoId</code> which is a hash of</p>
 <ul>
-<li>the underlying <code>ERC721</code>/<code>ERC1155</code> contract adress, say <code>A</code>.</li>
-<li><code>tokenId</code> of <code>A</code>, say <code>id</code></li>
-<li>the <code>ERC20</code> contract, say <code>B</code></li>
+<li>the underlying <code>ERC721</code>/<code>ERC1155</code> contract address, say <code>A</code>,</li>
+<li><code>tokenId</code> of <code>A</code>, say <code>id</code>,</li>
+<li>the <code>ERC20</code> contract, say <code>B</code>,</li>
 <li>and a boolean <code>floor</code>.</li>
 </ul>
-<p>All put together this means that the clones part of this queue want a claim on the NFT represented by <code>A</code> with tokenId <code>id</code>, and they are bidding using tokens of <code>B</code>. If <code>floor</code> is <code>true</code>, the clones are not bidding for any specific token in the NFT collection. In this case, <code>id</code> must have a constant value - <code>FLOOR_ID</code>.</p>
-<p>The queue now contains indexes (non-negative integers), and a <code>(protoId, index)</code> tuple uniquely identifies a clone. In fact, <code>cloneId</code> is defined as the hash of <code>protoId</code> and <code>index</code>.</p>
+<p>All together, this means that the clones part of this queue want a claim on the NFT represented by address <code>A</code> with tokenId <code>id</code>, and they are bidding using ERC20 token <code>B</code>. If <code>floor</code> is <code>true</code>, the clones are not bidding for any specific token in the NFT collection. In this case, <code>id</code> must have a constant value - <code>FLOOR_ID</code>.</p>
+<p>A <code>(protoId, index)</code> tuple uniquely identifies a clone, where <code>index</code> refers to the <code>0</code>-indexed position in the queue. In fact, <code>cloneId</code> is defined as the hash of <code>protoId</code> and <code>index</code>.</p>
 <p>A bidder is allowed to bid on an existing clone, or a new clone which is pushed at the end of the queue. If no clone is dissolved, the index of the clones in the queue will be <code>0,1,2,...</code> and so on. But since, a clone can be dissolved, at any moment the queue will be missing the indexes corresponding to the dissolved clones.</p>
+<p>Next, we go into detail on the actions you can take through Ditto protocol:</p>
 <h2 id="duplicate"><a class="header" href="#duplicate">Duplicate</a></h2>
+<p>Open or buy out a future on a particular NFT or floor Future of an ERC721 or ERC1155 collection. The ownership of this Future is represented via an ERC1155 token called a <code>clone</code>. The caller specifies:</p>
+<ul>
+<li><code>_ERC721Contract</code>: NFT contract, also referred to as the &quot;Underlying NFT&quot;.</li>
+<li><code>_tokenId</code>: the specific token ID of the NFT contract. For floors, <code>_tokenId</code> has to be <code>FLOOR_ID</code>.</li>
+<li><code>_ERC20Contract</code>: ERC20 token which is used to buy the clone,</li>
+<li><code>_amount</code>: amount of ERC20 token to buy the clone. Has to be at least the amount returned by <code>getMinAmountForCloneTransfer(cloneId)</code>,</li>
+<li><code>floor</code>: a boolean value determining if the purchase if for a floor Future.</li>
+<li><code>index</code>: position in the queue of the claim on the underlying NFT.</li>
+</ul>
+<p>If the bid is successful, this call returns two parameters:</p>
+<ul>
+<li><code>cloneId</code>: an ERC1155 token ID owned by the buyer.</li>
+<li><code>protoId</code>: identifier of the queue in which the clone was minted.</li>
+</ul>
+<pre><code class="language-javascript">function duplicate(
+        address _ERC721Contract,
+        uint _tokenId,
+        address _ERC20Contract,
+        uint128 _amount,
+        bool floor,
+        uint index
+    ) external returns (uint cloneId, uint protoId);
+</code></pre>
 <h2 id="dissolve"><a class="header" href="#dissolve">Dissolve</a></h2>
 <p>A clone owner can choose to burn the clone, which in effect, removes their claim on the underlying NFT.</p>
 <ul>
@@ -260,7 +284,10 @@
 <li>The subsidy is passed to the clone next in the queue.</li>
 <li>The corresponding index is removed from the queue.</li>
 </ul>
-<h2 id="trade"><a class="header" href="#trade">Trade</a></h2>
+<pre><code class="language-javascript">function dissolve(uint protoId, uint cloneId);
+</code></pre>
+<h2 id="underlying-nft-trade"><a class="header" href="#underlying-nft-trade">Underlying NFT Trade</a></h2>
+<p>If an underlying NFT owner decides to sell the NFT via Ditto, they just have to transfer it <code>DittoMachine</code> contract. This triggers a trade where the NFT to the clone owner at the front of the queue, and the subsidy amount plus clone's worth is transferred to the seller. It also burns the clone and moves the head of the queue to the next clone.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="vouchers"><a class="header" href="#vouchers">Vouchers</a></h1>
 <p>The Ditto smart contract keeps track of <code>vouchers</code>, a kind of receipt for having owned a clone with a position on an underlying NFT.</p>
 <p><code>vouchers</code> are recorded any time a larger position on a clone's underlying NFT replaces the current position.</p>
