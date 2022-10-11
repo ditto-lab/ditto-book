@@ -1,6 +1,6 @@
 # Token Ejector
 
-If you are developing a smart contract that plans to hold Ditto clones it is worth considering implementing the token ejector.
+If you are developing a smart contract that plans to hold Ditto clones, it is worth considering implementing the token ejector.
 
 ```javascript
 interface IERC721TokenEjector {
@@ -14,18 +14,18 @@ interface IERC721TokenEjector {
 
 }
 ```
-Because a clone can be force transferred from one owner to a new owner via the Ditto auction mechanism the Ditto contract will try to call the `onERC721Ejected` function on the previous owner.
+Because a clone can be force transferred to a new owner via the Ditto auction mechanism, the Ditto contract will try to call the `onERC721Ejected` function on the previous owner.
 
 ```javascript
 if (from.code.length != 0) {
-    try IERC721TokenEjector(from).onERC721Ejected{gas: 30000}(address(this), to, id, "") {} // EXTERNAL CALL
+    try IERC721TokenEjector(from).onERC721Ejected{gas: 30000}(address(this), to, id, "") {}
     catch {}
 }
 ```
 
-This will allow any smart contract that implements the token ejector a chance to do their own accounting or enact any necessary actions when the clone is force transferred from them to the new owner.
+This will allow any smart contract that implements the token ejector a chance to do their own accounting or enact any necessary actions when the clone is force transferred from them.
 
-The function call is given up to a `30 000` gas stipend to accomplish its goals. This should be more than enough gas to get anything reasonable done.
+The function call is given up to a `30_000` gas stipend to accomplish its goals. This should be more than enough gas to get anything reasonable done.
 
 If your contract does not implement `onERC721Ejected` the forced transfer will proceed as intended in any case.
 
