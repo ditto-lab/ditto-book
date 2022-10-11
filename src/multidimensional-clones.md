@@ -1,18 +1,18 @@
 # Multidimensional Clones
 
-Ditto Protocol creates a queue of clones. Each clone in that queue represent an eventual claim on some unique NFT. The clone at the front of the queue has the immediate claim on the underlying NFT when sold through the protocol.
+Ditto Protocol creates a queue of clones. Each clone in that queue represents an eventual claim on some unique NFT. The clone at the front of the queue has the immediate claim on the underlying NFT when sold through the protocol.
 
 As soon as this trade happens, the NFT is transferred to that clone owner, and the clone is burned.
 
 Here's a more technical description for accuracy -
 
 A queue `Q` is identified by a parameter `protoId` which is a hash of
-- the underlying `ERC721`/`ERC1155` contract adress, say `A`,
+- the underlying `ERC721`/`ERC1155` contract address, say `A`,
 - `tokenId` of `A`, say `id`,
 - the `ERC20` contract, say `B`,
 - and a boolean `floor`.
 
-All put together this means that the clones part of this queue want a claim on the NFT represented by address `A` with tokenId `id`, and they are bidding using tokens of ERC20 token `B`. If `floor` is `true`, the clones are not bidding for any specific token in the NFT collection. In this case, `id` must have a constant value - `FLOOR_ID`.
+All together, this means that the clones part of this queue want a claim on the NFT represented by address `A` with tokenId `id`, and they are bidding using ERC20 token `B`. If `floor` is `true`, the clones are not bidding for any specific token in the NFT collection. In this case, `id` must have a constant value - `FLOOR_ID`.
 
 A `(protoId, index)` tuple uniquely identifies a clone, where `index` refers to the `0`-indexed position in the queue. In fact, `cloneId` is defined as the hash of `protoId` and `index`.
 
@@ -55,4 +55,4 @@ function dissolve(uint protoId, uint cloneId);
 ```
 
 ## Underlying NFT Trade
-If an underlying NFT owner decides to sell the NFT via Ditto, they just have to transfer it `DittoMachine` contract, and it'll transfer the NFT to the clone owner at the front of the queue, and the subsidy amount plus clone's worth is transferred to the seller. It also burns the clone and moves the head of the queue to next clone.
+If an underlying NFT owner decides to sell the NFT via Ditto, they just have to transfer it `DittoMachine` contract. This triggers a trade where the NFT to the clone owner at the front of the queue, and the subsidy amount plus clone's worth is transferred to the seller. It also burns the clone and moves the head of the queue to the next clone.
